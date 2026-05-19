@@ -37,3 +37,4 @@ Desarrollar una solución basada en inteligencia artificial que permita mejorar 
 ## Nota
 
 Este proyecto es un prototipo educativo desarrollado para hackatón. No es un sistema comercial.
+git
