@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroGest | Panel de Control de Invernadero</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #090f08;
+            --bg-gradient: radial-gradient(circle at top right, #142814, #081007);
+            --card-bg: rgba(20, 35, 20, 0.6);
+            --border-glow: rgba(74, 222, 128, 0.15);
+            
+            --agrotech-green: #4ade80;
+            --agrotech-dark-green: #166534;
+            --agrotech-cyan: #22d3ee;
+            --agrotech-yellow: #facc15;
+            --agrotech-red: #f87171;
+            --bg-blocked: rgba(15, 23, 15, 0.4);
+            
+            --text-main: #f0fdf4;
+            --text-dim: #86efac;
+            --text-blocked: #64748b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            width: 100%;
+            max-width: 1300px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h2 {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--agrotech-green);
+            border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+            padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-left { display: flex; flex-direction: column; gap: 20px; }
+        .brand h1 { margin: 0; font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: 1px; }
+        .brand h1 span { color: var(--agrotech-green); }
+        .brand p { margin: 5px 0 0 0; font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
+
+        .gesture-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .icon-box { width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; border-radius: 8px; font-size: 16px; }
+        .bg-red { background: rgba(248, 113, 113, 0.15); color: var(--agrotech-red); }
+        .bg-green { background: rgba(74, 222, 128, 0.15); color: var(--agrotech-green); }
+        .bg-purple { background: rgba(34, 211, 238, 0.15); color: var(--agrotech-cyan); }
+        .bg-orange { background: rgba(250, 204, 21, 0.15); color: var(--agrotech-yellow); }
+
+        .gesture-info span { display: block; font-size: 13px; font-weight: 600; }
+        .gesture-info small { color: #a7f3d0; font-size: 11px; }
+
+        .main-content-area { display: flex; flex-direction: column; gap: 15px; }
+        .tabs-navigation { display: flex; gap: 10px; }
+
+        .tab-btn {
+            background: rgba(20, 35, 20, 0.4);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            color: var(--text-dim);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover { background: rgba(74, 222, 128, 0.1); color: #fff; }
+        
+        .tab-btn.active {
+            background: var(--agrotech-dark-green);
+            border-color: var(--agrotech-green);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+        }
+
+        .tab-btn.gesture-selected {
+            border-color: var(--agrotech-yellow) !important;
+            box-shadow: 0 0 15px var(--agrotech-yellow) !important;
+            animation: parpadeoSeleccion 0.8s infinite alternate;
+        }
+
+        @keyframes parpadeoSeleccion {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .tab-content { display: none; width: 100%; }
+        .tab-content.active { display: block; }
+
+        /* NUEVA DISPOSICIÓN: Cámara reducida y panel de control alineados horizontalmente */
+        .live-workspace {
+            display: grid;
+            grid-template-columns: 500px 1fr; /* Fijamos la cámara a 500px, haciéndola más chica */
+            gap: 20px;
+            align-items: start;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--agrotech-dark-green);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            line-height: 0;
+        }
+        .video-container img { width: 100%; height: auto; }
+
+        .status-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(9, 15, 8, 0.85);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            z-index: 10;
+        }
+        .pulse { width: 6px; height: 6px; background: var(--agrotech-green); border-radius: 50%; animation: pulse 2s infinite; }
+
+        .telemetry-container { display: flex; flex-direction: column; gap: 20px; }
+        .telemetry-large-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .large-data-box { background: rgba(0,0,0,0.25); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.04); display: flex; align-items: center; gap: 20px; position: relative; overflow: hidden; }
+        .large-data-box i.main-icon { font-size: 40px; }
+        .large-data-box .value { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; }
+        .large-data-box .label { font-size: 14px; color: var(--text-dim); font-weight: 600; }
+
+        .large-data-box.blocked { background: var(--bg-blocked); border-color: rgba(255,255,255,0.01); filter: grayscale(0.6); opacity: 0.5; }
+        .large-data-box.blocked .value, .large-data-box.blocked .label { color: var(--text-blocked); }
+        .lock-indicator { position: absolute; top: 15px; right: 15px; font-size: 12px; color: var(--agrotech-red); background: rgba(248, 113, 113, 0.1); padding: 4px 8px; border-radius: 6px; display: flex; align-items: center; gap: 5px; }
+
+        .valve-control { display: flex; flex-direction: column; gap: 15px; }
+        .status-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; }
+        .status-indicator { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; }
+        
+        .dot { width: 12px; height: 12px; background: var(--agrotech-red); border-radius: 50%; transition: all 0.3s ease; }
+        .dot.active { background: var(--agrotech-green); box-shadow: 0 0 12px var(--agrotech-green); }
+        #txt_estado { transition: color 0.3s ease; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        
+        <div class="sidebar-left">
+            <div class="card brand">
+                <h1>Agro<span>Gest</span></h1>
+                <p>HackaTec Prototipo • Invernadero IoT</p>
+            </div>
+
+            <div class="card">
+                <h2><i class="fa-solid fa-sign-language"></i> Comandos de Gesto</h2>
+                
+                <div class="gesture-item">
+                    <div class="icon-box bg-red"><i class="fa-solid fa-hand-back-fist"></i></div>
+                    <div class="gesture-info">
+                        <span>Puño Cerrado</span>
+                        <small>Detener Riego</small>
+                    </div>
+                </div>
+
+                <div class="gesture-item">
+                    <div class="icon-box bg-green"><i class="fa-solid fa-hand"></i></div>
+                    <div class="gesture-info">
+                        <span>Mano Abierta</span>
+                        <small>Activar Sistema</small>
+                    </div>
+                </div>
+
+                <div class="gesture-item">
+                    <div class="icon-box bg-purple"><i class="fa-solid fa-hand-peace"></i></div>
+                    <div class="gesture-info">
+                        <span>Dos Dedos</span>
+                        <small>Cambiar Selección</small>
+                    </div>
+                </div>
+
+                <div class="gesture-item">
+                    <div class="icon-box bg-orange"><i class="fa-solid fa-hand-spock"></i></div>
+                    <div class="gesture-info">
+                        <span>Tres Dedos</span>
+                        <small>Confirmar Pestaña</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content-area">
+            
+            <div class="tabs-navigation">
+                <button id="btn-tab-principal" class="tab-btn active" onclick="cambiarPestana('principal', this)">
+                    <i class="fa-solid fa-desktop"></i> Vista Principal
+                </button>
+                <button id="btn-tab-telemetria" class="tab-btn" onclick="cambiarPestana('telemetria', this)">
+                    <i class="fa-solid fa-chart-line"></i> Telemetría Avanzada
+                </button>
+            </div>
+
+            <div id="pestana-principal" class="tab-content active">
+                <div class="live-workspace">
+                    
+                    <div class="video-container">
+                        <div class="status-badge">
+                            <div class="pulse"></div>
+                            CAM_01 • NATIVO
+                        </div>
+                        <img src="{{ url_for('video_feed') }}" alt="Streaming AgroGest">
+                    </div>
+
+                    <div class="card" style="height: calc(100% - 40px); display: flex; flex-direction: column; justify-content: center;">
+                        <h2><i class="fa-solid fa-faucet-drip"></i> Estado de Actuadores</h2>
+                        <div class="valve-control">
+                            <div class="status-row">
+                                <span style="font-size: 14px; font-weight: 600;">Bomba Central:</span>
+                                <div class="status-indicator">
+                                    <div id="piloto_riego" class="dot"></div> 
+                                    <span id="txt_estado" style="color: var(--agrotech-red);">DESACTIVADO</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="pestana-telemetria" class="tab-content">
+                <div class="card telemetry-container">
+                    <h2><i class="fa-solid fa-chart-simple"></i> Monitoreo General de Sensores</h2>
+                    <div class="telemetry-large-grid">
+                        <div class="large-data-box">
+                            <i class="fa-solid fa-temperature-three-quarters main-icon" style="color: var(--agrotech-red);"></i>
+                            <div>
+                                <div class="value">24.5 °C</div>
+                                <div class="label">Temperatura Ambiente</div>
+                            </div>
+                        </div>
+                        <div class="large-data-box blocked">
+                            <div class="lock-indicator"><i class="fa-solid fa-lock"></i> Deshabilitado</div>
+                            <i class="fa-solid fa-droplet main-icon" style="color: var(--text-blocked);"></i>
+                            <div><div class="value">-- %</div><div class="label">Humedad del Aire</div></div>
+                        </div>
+                        <div class="large-data-box blocked">
+                            <div class="lock-indicator"><i class="fa-solid fa-lock"></i> Deshabilitado</div>
+                            <i class="fa-solid fa-seedling main-icon" style="color: var(--text-blocked);"></i>
+                            <div><div class="value">-- %</div><div class="label">Humedad del Suelo</div></div>
+                        </div>
+                        <div class="large-data-box blocked">
+                            <div class="lock-indicator"><i class="fa-solid fa-lock"></i> Deshabilitado</div>
+                            <i class="fa-solid fa-wind main-icon" style="color: var(--text-blocked);"></i>
+                            <div><div class="value">-- ppm</div><div class="label">Nivel de CO2</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let pestañaSeleccionadaPorGesto = "principal";
+        let bloqueoNavegacion = false; 
+
+        function cambiarPestana(idPestana, boton) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            if(idPestana === 'principal') {
+                document.getElementById('pestana-principal').classList.add('active');
+                pestañaSeleccionadaPorGesto = "principal";
+            } else if(idPestana === 'telemetria') {
+                document.getElementById('pestana-telemetria').classList.add('active');
+                pestañaSeleccionadaPorGesto = "telemetria";
+            }
+            boton.classList.add('active');
+            
+            bloqueoNavegacion = true; 
+            setTimeout(() => { bloqueoNavegacion = false; }, 1500);
+        }
+
+        function verificarEstadoYGestos() {
+            fetch('/estado')
+                .then(response => response.json())
+                .then(data => {
+                    const piloto = document.getElementById('piloto_riego');
+                    const texto = document.getElementById('txt_estado');
+                    if (data.riego === "ACTIVO") {
+                        piloto.classList.add('active');
+                        texto.innerText = "ACTIVO";
+                        texto.style.color = "var(--agrotech-green)";
+                    } else {
+                        piloto.classList.remove('active');
+                        texto.innerText = "DESACTIVADO";
+                        texto.style.color = "var(--agrotech-red)";
+                    }
+
+                    if (bloqueoNavegacion) return;
+
+                    const btnPrincipal = document.getElementById('btn-tab-principal');
+                    const btnTelemetria = document.getElementById('btn-tab-telemetria');
+                    const esPestanaPrincipalActiva = document.getElementById('pestana-principal').classList.contains('active');
+
+                    btnPrincipal.classList.remove('gesture-selected');
+                    btnTelemetria.classList.remove('gesture-selected');
+
+                    if (data.gesto === "DOS_DEDOS") {
+                        if (esPestanaPrincipalActiva) {
+                            btnTelemetria.classList.add('gesture-selected');
+                            pestañaSeleccionadaPorGesto = "telemetria";
+                        } else {
+                            btnPrincipal.classList.add('gesture-selected');
+                            pestañaSeleccionadaPorGesto = "principal";
+                        }
+                    } 
+                    else if (data.gesto === "TRES_DEDOS") {
+                        if (pestañaSeleccionadaPorGesto === "telemetria" && esPestanaPrincipalActiva) {
+                            cambiarPestana('telemetria', btnTelemetria);
+                        } else if (pestañaSeleccionadaPorGesto === "principal" && !esPestanaPrincipalActiva) {
+                            cambiarPestana('principal', btnPrincipal);
+                        }
+                    }
+                })
+                .catch(error => console.error("Error obteniendo estado:", error));
+        }
+
+        setInterval(verificarEstadoYGestos, 500); 
+    </script>
+</body>
+</html>
